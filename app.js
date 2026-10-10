@@ -4,7 +4,7 @@
   const E = window.CWEngine;
   const VERSION = '1.0.0';
   const KEY = 'clearweek.v1';
-  const DEMO = /[?&]demo\b/.test(location.search) || /\/demo\/?$/.test(location.pathname);
+  const DEMO = window.CW_FORCE_DEMO === true || /[?&]demo\b/.test(location.search) || /\/demo\/?$/.test(location.pathname);
   const $ = (sel, el) => (el || document).querySelector(sel);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
