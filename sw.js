@@ -1,14 +1,9 @@
-/* Clear Week offline cache. Bump VERSION on every release. */
-const VERSION = 'cw-1.0.0';
-const FILES = ['./', 'index.html', 'app.css', 'engine.js', 'app.js', 'manifest.webmanifest',
-  'bricolage-grotesque-latin-wght-normal.woff2', 'hanken-grotesk-latin-wght-normal.woff2',
-  'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
-self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
-self.addEventListener('fetch', e => {
-  const r = e.request; if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return;
-  e.respondWith(caches.match(r, { ignoreSearch: true }).then(hit => {
-    const net = fetch(r).then(res => { if (res && res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(r, copy)); } return res; }).catch(() => hit || caches.match('index.html'));
-    return hit || net;
-  }));
-});
+/* The top-level address is the free demo, which works without offline storage.
+   This removes any older offline copy that was stored here. The full app has its own worker in its folder. */
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil((async () => {
+  const keys = await caches.keys();
+  for (const k of keys) { const c = await caches.open(k); for (const r of await c.keys()) { const p = new URL(r.url).pathname; if (!p.includes('/app-gwgl49vv5g/')) await c.delete(r); } }
+  await self.registration.unregister();
+  for (const c of await self.clients.matchAll()) c.navigate(c.url);
+})()));
